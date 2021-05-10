@@ -27,6 +27,8 @@ import java.util.stream.Stream;
 
 public class FSProjectLoader implements ProjectLoader {
 
+    static int classesLoaded = 0;
+
     private ParserConfiguration init(Path projectPath, Path jarDir) throws IOException {
         TypeSolver reflectionTypeSolver = new ReflectionTypeSolver();
         CombinedTypeSolver combinedSolver = new CombinedTypeSolver();
@@ -66,6 +68,7 @@ public class FSProjectLoader implements ProjectLoader {
             boolean[] isInterface = new boolean[1];
             String clsName = cu.accept(new ClassNameVisitor(), isInterface);
             if (clsName != null) {
+                System.err.println(++classesLoaded);
                 List<Modifier> modifiersList = cu.accept(new ModifierVisitor(), ModifierVisitor.ModifierLevel.CLASS);
                 ClassMeta cls = new ClassMeta(clsName, modifiersList, isInterface[0]);
                 cls.setStartLine(cu.getBegin().get().line);
