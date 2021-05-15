@@ -38,6 +38,7 @@ public class FSProjectLoader implements ProjectLoader {
         Files.walk(jarDir, Integer.MAX_VALUE).filter(this::isJar).forEach(jar -> {
             try {
                 combinedSolver.add(new JarTypeSolver(jar));
+                //TODO: The log file contains an error
             } catch (IOException ignored) {}
         });
         JavaSymbolSolver symbolSolver = new JavaSymbolSolver(combinedSolver);
@@ -56,6 +57,7 @@ public class FSProjectLoader implements ProjectLoader {
         List<CompilationUnit> cus = roots.stream().flatMap(root -> {
             try {
                 return root.tryToParse().stream();
+                //TODO: The log file contains an error
             } catch (IOException e) {
                 return Stream.empty();
             }
@@ -68,6 +70,7 @@ public class FSProjectLoader implements ProjectLoader {
             boolean[] isInterface = new boolean[1];
             String clsName = cu.accept(new ClassNameVisitor(), isInterface);
             if (clsName != null) {
+                //TODO: And do I need to print it to the console?
                 System.err.println(++classesLoaded);
                 List<Modifier> modifiersList = cu.accept(new ModifierVisitor(), ModifierVisitor.ModifierLevel.CLASS);
                 ClassMeta cls = new ClassMeta(clsName, modifiersList, isInterface[0]);
@@ -90,6 +93,7 @@ public class FSProjectLoader implements ProjectLoader {
                 classMetaForCUs.put(cu, cls);
             }
         });
+        //TODO: Complex readability
         classMetaForCUs.forEach((cu, cls) -> { try {cu.accept(new MethodVisitor(), cls);} catch(Exception ignored){}});
         InnerClassVisitor.runInnerClassesMethodVisitors();
         MetaHolder.forEach(ClassMeta::resolveExtendedAndImplemented);

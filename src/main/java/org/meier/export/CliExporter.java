@@ -4,6 +4,7 @@ import org.meier.check.bean.AnalysisResult;
 
 public class CliExporter implements Exporter {
 
+    //TODO: Use logging
     @Override
     public void exportResults(AnalysisResult result) {
         result.getResults().forEach(ruleResult -> {

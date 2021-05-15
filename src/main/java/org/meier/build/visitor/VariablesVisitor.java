@@ -13,6 +13,7 @@ public class VariablesVisitor extends VoidVisitorAdapter<CodeContainer> {
     public void visit(VariableDeclarationExpr n, CodeContainer arg) {
         super.visit(n, arg);
         n.getVariables().forEach(variable -> {
+            //TODO: Strange name
             NameTypeBean varia = new NameTypeBean(variable.getNameAsString(), TypeResolver.getQualifiedName(variable.getType()), null);
             if (n.getParentNode().isPresent() && n.getParentNode().get() instanceof ForStmt)
                 varia.setLoopVariable(true);

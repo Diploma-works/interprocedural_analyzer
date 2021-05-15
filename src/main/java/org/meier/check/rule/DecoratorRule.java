@@ -17,6 +17,7 @@ public class DecoratorRule implements CheckRule {
 
     private final static double DECORATOR_RATIO_THRESHOLD = 0.6;
 
+    //TODO: Create a final class and move all the text to constants there (this is for all *Rule.java)
     @Override
     public RuleResult executeRule(Collection<ClassMeta> classes) {
         List<DefectCase> defects = new ArrayList<>();
