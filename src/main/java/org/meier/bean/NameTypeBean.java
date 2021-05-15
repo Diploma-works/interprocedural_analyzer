@@ -9,11 +9,20 @@ public class NameTypeBean {
     private final String className;
     private ResolvedType type;
     private boolean isLoopVariable = false;
+    private int lineNumber;
 
     public NameTypeBean(String name, String fullClassName, String className) {
         this.name = name;
         this.fullClassName = fullClassName;
         this.className = className;
+    }
+
+    public int getLineNumber() {
+        return lineNumber;
+    }
+
+    public void setLineNumber(int lineNumber) {
+        this.lineNumber = lineNumber;
     }
 
     public boolean isNotLoopVariable() {

@@ -16,6 +16,7 @@ public class VariablesVisitor extends VoidVisitorAdapter<CodeContainer> {
             NameTypeBean varia = new NameTypeBean(variable.getNameAsString(), TypeResolver.getQualifiedName(variable.getType()), null);
             if (n.getParentNode().isPresent() && n.getParentNode().get() instanceof ForStmt)
                 varia.setLoopVariable(true);
+            varia.setLineNumber(n.getBegin().get().line);
             arg.addVariable(varia);
         });
     }

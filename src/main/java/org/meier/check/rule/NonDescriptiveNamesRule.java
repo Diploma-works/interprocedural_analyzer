@@ -42,7 +42,7 @@ public class NonDescriptiveNamesRule implements CheckRule {
                                 .setDefectName("Non-descriptive variable name")
                                 .setClassName(cls.getFullName())
                                 .setDefectDescription(String.format("\"%s\" is probably not descriptive enough", variable.getName()))
-                                .setLineNumber(meth.getStartLine()));
+                                .setLineNumber(variable.getLineNumber()));
                     }
                 }
             }
@@ -65,7 +65,7 @@ public class NonDescriptiveNamesRule implements CheckRule {
                                     .setDefectName("Non-descriptive variable name")
                                     .setClassName(cls.getFullName())
                                     .setDefectDescription(String.format("\"%s\" is probably not descriptive enough", name))
-                                    .setLineNumber(block.getStartLine()));
+                                    .setLineNumber(variable.getLineNumber()));
                         }
                     }
                 }
