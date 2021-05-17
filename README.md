@@ -1,6 +1,6 @@
 # JADA
 Java architecture defect analyser
-An AST and an object representation of project is build and passed to rule runner which executes 
+An AST and an object representation of project is built and passed to rule runner which executes 
 all rules present on them. Results are exported to Exporter module.
 
 ### Run
