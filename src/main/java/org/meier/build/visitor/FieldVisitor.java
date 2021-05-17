@@ -2,7 +2,7 @@ package org.meier.build.visitor;
 
 import com.github.javaparser.ast.body.FieldDeclaration;
 import com.github.javaparser.ast.visitor.VoidVisitorAdapter;
-import org.meier.bean.NameTypeBean;
+import org.meier.bean.VariableBean;
 import org.meier.model.ClassMeta;
 import org.meier.model.FieldMeta;
 import org.meier.model.Modifier;
@@ -18,7 +18,7 @@ public class FieldVisitor extends VoidVisitorAdapter<ClassMeta> {
     public void visit(FieldDeclaration fieldDecl, ClassMeta classMeta) {
         try {
             List<Modifier> modifiersList = fieldDecl.accept(new ModifierVisitor(), ModifierVisitor.ModifierLevel.FIELD);
-            List<NameTypeBean> names = new ArrayList<>();
+            List<VariableBean> names = new ArrayList<>();
             fieldDecl.accept(new NameTypeVisitor(), names);
             Set<Modifier> modifiers = Set.copyOf(modifiersList);
             classMeta.setFields(names.stream()

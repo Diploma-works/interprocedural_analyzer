@@ -1,6 +1,7 @@
 package org.meier.check.rule;
 
 import org.meier.check.bean.DefectCase;
+import org.meier.check.bean.DefectMessages;
 import org.meier.check.bean.RuleResult;
 import org.meier.check.rule.util.ClassMetaInfo;
 import org.meier.check.rule.util.TypeInfo;
@@ -18,6 +19,8 @@ import java.util.stream.Collectors;
 @Rule
 public class FactoryMethodRule implements CheckRule {
 
+    private static final String RULE_NAME = "Factory methods check";
+
     @Override
     public RuleResult executeRule(Collection<ClassMeta> classes) {
         List<DefectCase> defects = new ArrayList<>();
@@ -29,16 +32,15 @@ public class FactoryMethodRule implements CheckRule {
                         (method.getModifiers().contains(Modifier.FINAL) || getAllOverriddenVersions(method).stream().allMatch(this::hasNoIfsAndSwitchesDeepSearch)) &&
                         !ClassMetaInfo.hasBuilderSetter(createdType)) {
                     defects.add(DefectCase.newInstance()
-                        .setDefectName("Unnecessary Factory method")
+                        .setDefectName(DefectMessages.FACTORY_METHOD_NAME)
                         .setClassName(cls.getFullName())
                         .setLineNumber(method.getStartLine())
                         .setMethodName(method.getShortName())
-                        .setDefectDescription("This factory method serves no purpose - it is not a part of Singleton or Builder pattern, " +
-                                "all implementations create the object of same type and it is always set up the same way. Using constructor should probably be considered"));
+                        .setDefectDescription(DefectMessages.FACTORY_METHOD_DESCRIPTION));
                 }
             });
         }
-        return new RuleResult("Factory methods check", defects);
+        return new RuleResult(RULE_NAME, defects);
     }
 
     private boolean hasNoIfsAndSwitchesDeepSearch(MethodMeta method) {

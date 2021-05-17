@@ -1,6 +1,7 @@
 package org.meier.check.rule;
 
 import org.meier.check.bean.DefectCase;
+import org.meier.check.bean.DefectMessages;
 import org.meier.check.bean.RuleResult;
 import org.meier.inject.annotation.Rule;
 import org.meier.model.ClassMeta;
@@ -16,18 +17,19 @@ import java.util.Objects;
 @Rule
 public class DependencyInversionRule implements CheckRule {
 
+    private static final String RULE_NAME = "Dependency inversion check";
+
     @Override
     public RuleResult executeRule(Collection<ClassMeta> classes) {
         List<DefectCase> defects = new ArrayList<>();
-        classes.forEach(cls -> {
-            getUsedClasses(cls).stream().filter(usedCl -> isInherited(cls, usedCl)).forEach(cl ->
-                    defects.add(DefectCase.newInstance()
-                    .setDefectName("Ancestor depends on child class")
-                    .setClassName(cls.getFullName())
-                    .setDefectDescription(String.format("Class %s is ancestor of class %s, yet it depends on it, thus breaking the dependency inversion principle.",
-                        cls.getFullName(), cl.getFullName()))));
-        });
-        return new RuleResult("Dependency inversion check", defects);
+        classes.forEach(cls ->
+                getUsedClasses(cls).stream().filter(usedCl -> isInherited(cls, usedCl)).forEach(cl ->
+                defects.add(DefectCase.newInstance()
+                .setDefectName(DefectMessages.DEPENDENCY_INVERSION_NAME)
+                .setClassName(cls.getFullName())
+                .setDefectDescription(String.format(DefectMessages.DEPENDENCY_INVERSION_DESCRIPTION,
+                    cls.getFullName(), cl.getFullName())))));
+        return new RuleResult(RULE_NAME, defects);
     }
 
     private List<ClassMeta> getUsedClasses(ClassMeta cls) {

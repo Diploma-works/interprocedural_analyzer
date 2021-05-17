@@ -1,6 +1,7 @@
 package org.meier.check.rule;
 
 import org.meier.check.bean.DefectCase;
+import org.meier.check.bean.DefectMessages;
 import org.meier.check.bean.RuleResult;
 import org.meier.check.rule.visitor.CreateIfNullVisitor;
 import org.meier.check.rule.visitor.ObjectCreationVisitor;
@@ -19,6 +20,7 @@ import java.util.function.Predicate;
 @Rule
 public class SingletonRule implements CheckRule {
 
+    private static final String RULE_NAME = "Singleton check";
     private final Predicate<FieldMeta> isInstance = field -> field.isStatic() && field.getFullClassName().equals(field.getOwnerClass().getFullName());
     private final Predicate<MethodMeta> isInstanceMethod = meth -> meth.isStatic() && meth.getFullQualifiedReturnType().equals(meth.getOwnerClass().getFullName());
 
@@ -28,20 +30,18 @@ public class SingletonRule implements CheckRule {
         classes.stream().filter(this::isSingleton).forEach(cls -> {
             if (!isInstancePrivate(cls)) {
                 defects.add(DefectCase.newInstance()
-                    .setDefectName("Singleton instance is not encapsulated")
+                    .setDefectName(DefectMessages.SINGLETON_ENCAPSULATION_NAME)
                     .setClassName(cls.getFullName())
-                    .setDefectDescription("Instance field of a singleton class is not private"));
+                    .setDefectDescription(DefectMessages.SINGLETON_ENCAPSULATION_DESCRIPTION));
             }
             if (!isInstanceCreationThreadSafe(cls)) {
                 defects.add(DefectCase.newInstance()
-                    .setDefectName("Singleton instance creation is not thread-safe")
+                    .setDefectName(DefectMessages.SINGLETON_THREAD_SAFE_NAME)
                     .setClassName(cls.getFullName())
-                    .setDefectDescription("Singleton instance is created in an access method and there is no check if instance" +
-                            "has already been created or there is no synchronisation implemented to prevent instance from being " +
-                            "created several times in a multi-threaded environment"));
+                    .setDefectDescription(DefectMessages.SINGLETON_THREAD_SAFE_DESCRIPTION));
             }
         });
-        return new RuleResult("Singleton check", defects);
+        return new RuleResult(RULE_NAME, defects);
     }
 
     private boolean isSingleton(ClassMeta cls) {

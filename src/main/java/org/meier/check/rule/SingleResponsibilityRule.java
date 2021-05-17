@@ -2,6 +2,7 @@ package org.meier.check.rule;
 
 import com.github.javaparser.utils.Pair;
 import org.meier.check.bean.DefectCase;
+import org.meier.check.bean.DefectMessages;
 import org.meier.check.bean.RuleResult;
 import org.meier.check.rule.util.ClassMetaInfo;
 import org.meier.inject.annotation.Rule;
@@ -16,6 +17,8 @@ import java.util.stream.Collectors;
 @Rule
 public class SingleResponsibilityRule implements CheckRule {
 
+    private static final String RULE_NAME = "Single Responsibility check";
+
     private final double GROUP_SEPARATOR_THRESHOLD = 0.2;
 
     @Override
@@ -25,22 +28,19 @@ public class SingleResponsibilityRule implements CheckRule {
             if (!isClassStaticSingleResponsible(meta)) {
                 defects.add(DefectCase.newInstance()
                 .setClassName(meta.getFullName())
-                .setDefectName("Suspicious set of static and non-static methods in class")
-                .setDefectDescription("Static methods' ratio is high, yet class contains non-static methods as well. " +
-                        "Static and non-static methods probably serve different purposes, which breaks the" +
-                        " Single Responsibility principle"));
+                .setDefectName(DefectMessages.SINGLE_RESPONSIBILITY_STATIC_NAME)
+                .setDefectDescription(DefectMessages.SINGLE_RESPONSIBILITY_STATIC_DESCRIPTION));
             }
             List<Set<MethodMeta>> methodGroups = getPurposeGroups(meta);
             if (methodGroups.size() > 1) {
                 defects.add(DefectCase.newInstance()
                     .setClassName(meta.getFullName())
-                    .setDefectName("Several logic groups of methods in a single class")
-                    .setDefectDescription("Class contains several almost independent groups of methods, which could be " +
-                            "a sign of breaking the Single Responsibility principle. Groups:\n"+
+                    .setDefectName(DefectMessages.SINGLE_RESPONSIBILITY_GROUPS_NAME)
+                    .setDefectDescription(DefectMessages.SINGLE_RESPONSIBILITY_GROUPS_DESCRIPTION+
                             buildPurposeGroupsDescription(methodGroups)));
             }
         }
-        return new RuleResult("Single Responsibility check", defects);
+        return new RuleResult(RULE_NAME, defects);
     }
 
     private boolean isClassStaticSingleResponsible(ClassMeta meta) {

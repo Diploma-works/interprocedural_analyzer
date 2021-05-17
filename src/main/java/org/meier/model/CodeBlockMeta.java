@@ -2,7 +2,7 @@ package org.meier.model;
 
 import com.github.javaparser.ast.body.InitializerDeclaration;
 import org.meier.bean.CalledMethodBean;
-import org.meier.bean.NameTypeBean;
+import org.meier.bean.VariableBean;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -12,7 +12,7 @@ import java.util.stream.Collectors;
 
 public class CodeBlockMeta implements Meta, CodeContainer {
 
-    private List<NameTypeBean> variables;
+    private List<VariableBean> variables;
     private ClassMeta ownerClass;
     private InitializerDeclaration code;
     private boolean staticBlock;
@@ -73,18 +73,18 @@ public class CodeBlockMeta implements Meta, CodeContainer {
     }
 
     @Override
-    public void addVariable(NameTypeBean variable) {
+    public void addVariable(VariableBean variable) {
         if (variables == null)
             variables = new ArrayList<>();
         this.variables.add(variable);
     }
 
     @Override
-    public List<NameTypeBean> getVariables() {
+    public List<VariableBean> getVariables() {
         return variables == null ? Collections.emptyList() : variables;
     }
 
-    public CodeBlockMeta setVariables(List<NameTypeBean> variables) {
+    public CodeBlockMeta setVariables(List<VariableBean> variables) {
         this.variables = variables;
         return this;
     }

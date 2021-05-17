@@ -16,6 +16,8 @@ import com.github.javaparser.utils.ProjectRoot;
 import com.github.javaparser.utils.SourceRoot;
 import org.meier.build.visitor.*;
 import org.meier.model.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -27,7 +29,7 @@ import java.util.stream.Stream;
 
 public class FSProjectLoader implements ProjectLoader {
 
-    static int classesLoaded = 0;
+    private static final Logger log = LoggerFactory.getLogger(FSProjectLoader.class);
 
     private ParserConfiguration init(Path projectPath, Path jarDir) throws IOException {
         TypeSolver reflectionTypeSolver = new ReflectionTypeSolver();
@@ -38,8 +40,9 @@ public class FSProjectLoader implements ProjectLoader {
         Files.walk(jarDir, Integer.MAX_VALUE).filter(this::isJar).forEach(jar -> {
             try {
                 combinedSolver.add(new JarTypeSolver(jar));
-                //TODO: The log file contains an error
-            } catch (IOException ignored) {}
+            } catch (IOException error) {
+                log.debug("Failed to add a dependency jar", error);
+            }
         });
         JavaSymbolSolver symbolSolver = new JavaSymbolSolver(combinedSolver);
         return StaticJavaParser.getConfiguration()
@@ -57,8 +60,8 @@ public class FSProjectLoader implements ProjectLoader {
         List<CompilationUnit> cus = roots.stream().flatMap(root -> {
             try {
                 return root.tryToParse().stream();
-                //TODO: The log file contains an error
             } catch (IOException e) {
+                log.debug("Failed to parse source file", e);
                 return Stream.empty();
             }
         }).map(pr -> pr.getResult().orElse(null))
@@ -66,35 +69,40 @@ public class FSProjectLoader implements ProjectLoader {
                 .collect(Collectors.toList());
 
         LinkedHashMap<CompilationUnit, ClassMeta> classMetaForCUs = new LinkedHashMap<>();
-        cus.forEach(cu -> {
+        cus.forEach(classAst -> {
             boolean[] isInterface = new boolean[1];
-            String clsName = cu.accept(new ClassNameVisitor(), isInterface);
+            String clsName = classAst.accept(new ClassNameVisitor(), isInterface);
             if (clsName != null) {
-                //TODO: And do I need to print it to the console?
-                System.err.println(++classesLoaded);
-                List<Modifier> modifiersList = cu.accept(new ModifierVisitor(), ModifierVisitor.ModifierLevel.CLASS);
+                List<Modifier> modifiersList = classAst.accept(new ModifierVisitor(), ModifierVisitor.ModifierLevel.CLASS);
                 ClassMeta cls = new ClassMeta(clsName, modifiersList, isInterface[0]);
-                cls.setStartLine(cu.getBegin().get().line);
-                ClassOrInterfaceDeclaration clIntDecl = (ClassOrInterfaceDeclaration) cu.getChildNodes().stream().filter(node -> node instanceof ClassOrInterfaceDeclaration).findFirst().orElse(null);
-                EnumDeclaration enumDecl = (EnumDeclaration) cu.getChildNodes().stream().filter(node -> node instanceof EnumDeclaration).findFirst().orElse(null);
+                cls.setStartLine(classAst.getBegin().get().line);
+                ClassOrInterfaceDeclaration clIntDecl = (ClassOrInterfaceDeclaration) classAst.getChildNodes().stream().filter(node -> node instanceof ClassOrInterfaceDeclaration).findFirst().orElse(null);
+                EnumDeclaration enumDecl = (EnumDeclaration) classAst.getChildNodes().stream().filter(node -> node instanceof EnumDeclaration).findFirst().orElse(null);
                 if (clIntDecl != null) {
                     try {
                         cls.setExtendedClasses(clIntDecl.getExtendedTypes().stream().map(type -> type.resolve().getQualifiedName()).collect(Collectors.toList()));
                         cls.setImplementedInterfaces(clIntDecl.getImplementedTypes().stream().map(type -> type.resolve().getQualifiedName()).collect(Collectors.toList()));
-                    } catch (Exception ignored) {}
+                    } catch (Exception error) {
+                        log.debug("Failed to resolve type", error);
+                    }
                 } else if (enumDecl != null) {
                     cls.setImplementedInterfaces(enumDecl.getImplementedTypes().stream().map(type -> type.resolve().getQualifiedName()).collect(Collectors.toList()));
                 }
-                cu.accept(new InitializerBlocksVisitor(), cls);
+                classAst.accept(new InitializerBlocksVisitor(), cls);
                 MetaHolder.addClass(cls);
-                cu.accept(new FieldVisitor(), cls);
-                cu.accept(new ConstructorVisitor(), cls);
-                cu.accept(new InnerClassVisitor(), cls);
-                classMetaForCUs.put(cu, cls);
+                classAst.accept(new FieldVisitor(), cls);
+                classAst.accept(new ConstructorVisitor(), cls);
+                classAst.accept(new InnerClassVisitor(), cls);
+                classMetaForCUs.put(classAst, cls);
             }
         });
-        //TODO: Complex readability
-        classMetaForCUs.forEach((cu, cls) -> { try {cu.accept(new MethodVisitor(), cls);} catch(Exception ignored){}});
+        classMetaForCUs.forEach((classAst, classMeta) -> {
+            try {
+                classAst.accept(new MethodVisitor(), classMeta);
+            } catch(Exception error){
+                log.warn("Failed to process source file", error);
+            }}
+        );
         InnerClassVisitor.runInnerClassesMethodVisitors();
         MetaHolder.forEach(ClassMeta::resolveExtendedAndImplemented);
         MetaHolder.forEach(ClassMeta::resolveMethodCalls);

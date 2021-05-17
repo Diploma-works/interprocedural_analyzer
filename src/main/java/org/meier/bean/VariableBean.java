@@ -2,7 +2,7 @@ package org.meier.bean;
 
 import com.github.javaparser.resolution.types.ResolvedType;
 
-public class NameTypeBean {
+public class VariableBean {
 
     private final String name;
     private final String fullClassName;
@@ -11,7 +11,7 @@ public class NameTypeBean {
     private boolean isLoopVariable = false;
     private int lineNumber;
 
-    public NameTypeBean(String name, String fullClassName, String className) {
+    public VariableBean(String name, String fullClassName, String className) {
         this.name = name;
         this.fullClassName = fullClassName;
         this.className = className;

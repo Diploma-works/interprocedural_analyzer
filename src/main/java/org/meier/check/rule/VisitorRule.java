@@ -1,6 +1,7 @@
 package org.meier.check.rule;
 
 import org.meier.check.bean.DefectCase;
+import org.meier.check.bean.DefectMessages;
 import org.meier.check.bean.RuleResult;
 import org.meier.check.rule.util.ClassMetaInfo;
 import org.meier.inject.annotation.Rule;
@@ -14,6 +15,7 @@ import java.util.stream.Collectors;
 @Rule
 public class VisitorRule implements CheckRule {
 
+    private static final String RULE_NAME = "Visitor check";
     private final static int COMPLEXITY_FIELDS_NUM_THRESHOLD = 5;
     private final Map<ClassMeta, List<ClassMeta>> visitorsPerClass = new HashMap<>();
 
@@ -45,24 +47,20 @@ public class VisitorRule implements CheckRule {
                                 commonAncestors.removeAll(descendants);
                                 if (commonAncestors.stream().noneMatch(ancestor -> visitedBy(ancestor).contains(entry.getKey()))) {
                                     defects.add(DefectCase.newInstance()
-                                        .setDefectName("Inconsistent visitable classes hierarchy")
+                                        .setDefectName(DefectMessages.VISITOR_CONSISTENCY_NAME)
                                         .setClassName(cls.getFullName())
-                                        .setDefectDescription(String.format("More than one descendant of class %s " +
-                                                "implement a visitor pattern with %s as a visitor class, but some classes " +
-                                                "in the hierarchy can not be visited. This is probably an inconsistency",
+                                        .setDefectDescription(String.format(DefectMessages.VISITOR_CONSISTENCY_DESCRIPTION,
                                                 cls.getFullName(), entry.getKey().getFullName())));
                                 }
                             });
                     if (isClassTreeLikeAndComplexAndNotVisited(cls)) {
                         defects.add(DefectCase.newInstance()
-                            .setDefectName("Visitor is advised")
+                            .setDefectName(DefectMessages.VISITOR_ADVISED_NAME)
                             .setClassName(cls.getFullName())
-                            .setDefectDescription("Class %s represents a complex tree structure. It is advisable to " +
-                                    "implement a Visitor to process this class' objects. That would help separate data " +
-                                    "definition and business logic"));
+                            .setDefectDescription(DefectMessages.VISITOR_ADVISED_DESCRIPTION));
                     }
                 });
-        return new RuleResult("Visitor check", defects);
+        return new RuleResult(RULE_NAME, defects);
     }
 
     private List<ClassMeta> visitedBy(ClassMeta visitedClass) {

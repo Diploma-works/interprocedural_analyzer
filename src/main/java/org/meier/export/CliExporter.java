@@ -1,40 +1,39 @@
 package org.meier.export;
 
 import org.meier.check.bean.AnalysisResult;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class CliExporter implements Exporter {
 
-    //TODO: Use logging
+    private static final Logger log = LoggerFactory.getLogger(CliExporter.class);
+
     @Override
     public void exportResults(AnalysisResult result) {
         result.getResults().forEach(ruleResult -> {
-            System.out.printf("%s:\n", ruleResult.getRuleName());
+            log.info(String.format("%s:", ruleResult.getRuleName()));
             if (ruleResult.getFoundDefects().isEmpty()) {
-                System.out.println("No defects found");
+                log.info("No defects found\n\n\n");
             }
             else {
                 ruleResult.getFoundDefects().forEach(defect -> {
-                    System.out.printf("%s:\n", defect.getDefectName());
+                    log.info(String.format("%s:", defect.getDefectName()));
                     if (defect.getClassName() != null)
-                        System.out.printf("in %s", defect.getClassName());
+                        log.info(String.format("in %s", defect.getClassName()));
                     if (defect.getLineNumber() != null)
-                        System.out.printf("; at %d:\n", defect.getLineNumber());
-                    else
-                        System.out.println();
+                        log.info(String.format("at %d:", defect.getLineNumber()));
                     if (defect.getMethodName() != null)
-                        System.out.printf("in %s:\n", defect.getMethodName());
-                    System.out.println(defect.getDefectDescription());
-                    System.out.println();
+                        log.info(String.format("in %s:", defect.getMethodName()));
+                    log.info(defect.getDefectDescription()+"\n\n\n");
                 });
             }
-            System.out.print("\n\n\n");
         });
         printTotal(result);
     }
 
     private void printTotal(AnalysisResult result) {
-        System.out.println("Total defects found:");
-        result.getResults().forEach(res -> System.out.println(res.getRuleName()+"\t:\t"+res.getFoundDefects().size()));
+        log.info("Total defects found:");
+        result.getResults().forEach(res -> log.info(res.getRuleName()+"\t:\t"+res.getFoundDefects().size()));
     }
 
 }

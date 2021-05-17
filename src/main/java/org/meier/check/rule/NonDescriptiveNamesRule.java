@@ -1,7 +1,8 @@
 package org.meier.check.rule;
 
-import org.meier.bean.NameTypeBean;
+import org.meier.bean.VariableBean;
 import org.meier.check.bean.DefectCase;
+import org.meier.check.bean.DefectMessages;
 import org.meier.check.bean.RuleResult;
 import org.meier.inject.annotation.Rule;
 import org.meier.model.ClassMeta;
@@ -17,7 +18,9 @@ import java.util.Set;
 @Rule
 public class NonDescriptiveNamesRule implements CheckRule {
 
-    private final Set<String> shortDescriptiveNames = Set.of("me", "id", "no", "or", "f", "is", "cl", "i");
+    private static final String RULE_NAME = "Descriptive naming test";
+
+    private final Set<String> shortDescriptiveNames = Set.of("me", "id", "no", "or", "f", "is", "cl", "i", "rs");
 
     @Override
     public RuleResult executeRule(Collection<ClassMeta> classes) {
@@ -32,16 +35,16 @@ public class NonDescriptiveNamesRule implements CheckRule {
                     defects.add(DefectCase.newInstance()
                             .setClassName(cls.getFullName())
                             .setMethodName(methName)
-                            .setDefectName("Non-descriptive method name")
-                            .setDefectDescription(String.format("\"%s\" is probably not descriptive enough", methName))
+                            .setDefectName(DefectMessages.NAMING_METHOD_NAME)
+                            .setDefectDescription(String.format(DefectMessages.NAMING_METHOD_DESCRIPTION, methName))
                             .setLineNumber(meth.getStartLine()));
                 }
-                for (NameTypeBean variable : meth.getVariables()) {
+                for (VariableBean variable : meth.getVariables()) {
                     if (variable.isNotLoopVariable() && isNonDescriptive(variable.getName())) {
                         defects.add(DefectCase.newInstance()
-                                .setDefectName("Non-descriptive variable name")
+                                .setDefectName(DefectMessages.NAMING_VARIABLE_NAME)
                                 .setClassName(cls.getFullName())
-                                .setDefectDescription(String.format("\"%s\" is probably not descriptive enough", variable.getName()))
+                                .setDefectDescription(String.format(DefectMessages.NAMING_VARIABLE_DESCRIPTION, variable.getName()))
                                 .setLineNumber(variable.getLineNumber()));
                     }
                 }
@@ -50,28 +53,28 @@ public class NonDescriptiveNamesRule implements CheckRule {
                 String name = field.getName();
                 if (isNonDescriptive(name)) {
                     defects.add(DefectCase.newInstance()
-                            .setDefectName("Non-descriptive field name")
+                            .setDefectName(DefectMessages.NAMING_FIELD_NAME)
                             .setClassName(cls.getFullName())
-                            .setDefectDescription(String.format("\"%s\" is probably not descriptive enough", name))
+                            .setDefectDescription(String.format(DefectMessages.NAMING_FIELD_DESCRIPTION, name))
                             .setLineNumber(field.getStartLine()));
                 }
             }
             for (CodeBlockMeta block : initializerBlocks) {
-                for (NameTypeBean variable : block.getVariables()) {
+                for (VariableBean variable : block.getVariables()) {
                     if (variable.isNotLoopVariable()) {
                         String name = variable.getName();
                         if (isNonDescriptive(name)) {
                             defects.add(DefectCase.newInstance()
-                                    .setDefectName("Non-descriptive variable name")
+                                    .setDefectName(DefectMessages.NAMING_VARIABLE_NAME)
                                     .setClassName(cls.getFullName())
-                                    .setDefectDescription(String.format("\"%s\" is probably not descriptive enough", name))
+                                    .setDefectDescription(String.format(DefectMessages.NAMING_VARIABLE_DESCRIPTION, name))
                                     .setLineNumber(variable.getLineNumber()));
                         }
                     }
                 }
             }
         });
-        return new RuleResult("Descriptive naming test", defects);
+        return new RuleResult(RULE_NAME, defects);
     }
 
     private boolean isNonDescriptive(String name) {

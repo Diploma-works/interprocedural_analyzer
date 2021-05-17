@@ -1,6 +1,7 @@
 package org.meier.check.rule;
 
 import org.meier.check.bean.DefectCase;
+import org.meier.check.bean.DefectMessages;
 import org.meier.check.bean.RuleResult;
 import org.meier.check.rule.util.ClassMetaInfo;
 import org.meier.check.rule.util.TypeInfo;
@@ -15,9 +16,10 @@ import java.util.stream.Collectors;
 @Rule
 public class DecoratorRule implements CheckRule {
 
+    private static final String RULE_NAME = "Decorator check";
+
     private final static double DECORATOR_RATIO_THRESHOLD = 0.6;
 
-    //TODO: Create a final class and move all the text to constants there (this is for all *Rule.java)
     @Override
     public RuleResult executeRule(Collection<ClassMeta> classes) {
         List<DefectCase> defects = new ArrayList<>();
@@ -26,18 +28,16 @@ public class DecoratorRule implements CheckRule {
                 .filter(field -> !ClassMetaInfo.getAllAncestors(cls).contains(MetaHolder.getClass(field.getFullClassName())))
                 .forEach(field ->
                         defects.add(DefectCase.newInstance()
-                    .setDefectName("Missed decorator opportunity")
+                    .setDefectName(DefectMessages.DECORATOR_NAME)
                     .setClassName(cls.getFullName())
                     .setLineNumber(field.getStartLine())
-                    .setDefectDescription(String.format("There is a \"has-a\" relationship between %s and %s. Field %s in class %s is " +
-                            "used to decorate class %s, but there is no inheritance between classes and therefore " +
-                            "polymorphism is disabled. That is probably a missed opportunity to use Decorator pattern.",
+                    .setDefectDescription(String.format(DefectMessages.DECORATOR_DESCRIPTION,
                                 cls.getFullName(),
                                 field.getFullClassName(),
                                 field.getName(),
                                 cls.getFullName(),
                                 field.getFullClassName())))));
-        return new RuleResult("Decorator check", defects);
+        return new RuleResult(RULE_NAME, defects);
     }
 
     private boolean isFieldUsedToDecorate(FieldMeta field, ClassMeta decoratorCls) {

@@ -3,7 +3,7 @@ package org.meier.model;
 import com.github.javaparser.ast.body.MethodDeclaration;
 import com.github.javaparser.ast.type.Type;
 import org.meier.bean.CalledMethodBean;
-import org.meier.bean.NameTypeBean;
+import org.meier.bean.VariableBean;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -19,7 +19,7 @@ public class MethodMeta implements Meta, CodeContainer {
     private List<CalledMethodBean> calledMethodsNames;
     private ClassMeta ownerClass;
     private final MethodDeclaration content;
-    private List<NameTypeBean> variables;
+    private List<VariableBean> variables;
     private final Set<ClassMeta> calledBy = new HashSet<>();
     private final Type returnType;
     private final boolean overrideAnnotationPresent;
@@ -71,7 +71,7 @@ public class MethodMeta implements Meta, CodeContainer {
     }
 
     @Override
-    public List<NameTypeBean> getVariables() {
+    public List<VariableBean> getVariables() {
         return variables == null ? Collections.emptyList() : variables;
     }
 
@@ -80,7 +80,7 @@ public class MethodMeta implements Meta, CodeContainer {
     }
 
     @Override
-    public void addVariable(NameTypeBean variable) {
+    public void addVariable(VariableBean variable) {
         if (variables == null)
             variables = new ArrayList<>();
         variables.add(variable);
@@ -90,7 +90,7 @@ public class MethodMeta implements Meta, CodeContainer {
         return this.modifiers.contains(Modifier.ABSTRACT) || this.ownerClass.isInterface();
     }
 
-    public void setVariables(List<NameTypeBean> vars) {
+    public void setVariables(List<VariableBean> vars) {
         this.variables = vars;
     }
 

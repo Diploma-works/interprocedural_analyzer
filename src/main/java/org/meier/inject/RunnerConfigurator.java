@@ -1,6 +1,6 @@
 package org.meier.inject;
 
-import org.meier.Main;
+import org.meier.Manager;
 import org.meier.check.RuleRunner;
 import org.meier.check.rule.CheckRule;
 import org.meier.export.Exporter;
@@ -27,7 +27,7 @@ public class RunnerConfigurator {
     }
 
     public void configureRunner() throws RuntimeException {
-        Stream.of(Main.class.getDeclaredFields()).filter(field -> field.isAnnotationPresent(InjectRunner.class)).forEach(runnerField -> {
+        Stream.of(Manager.class.getDeclaredFields()).filter(field -> field.isAnnotationPresent(InjectRunner.class)).forEach(runnerField -> {
             try {
                 runnerField.setAccessible(true);
                 Constructor constructor = runnerField.getAnnotation(InjectRunner.class).runnerType().type().getDeclaredConstructor();
