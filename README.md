@@ -26,6 +26,28 @@ list of arguments.
 + **EnumMeta** - extends ClassMeta. Describes an enum and contains a list of all enum constants.
 + **EnumConstantMeta** - extends EnumMeta. Contains a name.
 
+### Implemented checks
+Currently there are 8 rules:
++ **Single responsibility rule** - checks if class is single responsible. It calculates the number of 
+common used fields for each pair of methods, saving the largest number, and divides methods into groups. Each group 
+consists of methods that share more than largest\*threshold common fields. This property is transitive. If class 
+contains more than one group, it is probably not single responsible.
++ **Inversion control rule** - checks if class is using some of his descendants.
++ **Encapsulation rule** - checks if all fields are either private or final and that all methods are either private or
+called from outside their class.
++ **Descriptive naming rule** - checks if names are longer than 2 characters or are known and commonly used (such as "id")
+and that ratio of non-character symbols in a name is below threshold.
++ **Factory method rule** - checks if all factory methods are necessary, that being using polymorphism or setting up
+objects based on conditions.
++ **Visitor rule** - checks if each class hiererchy is visitor-consistent (either no classes could be visited by some visitor or
+all of them). If some classes of hierarchy could be visited, but they acquire that by implementing some interface from outside the 
+hierarchy, it does not count as defect. This rule also provides recommendations to implement visitor for classes with tree-like 
+object structure.
++ **Decorator rule** - looks for potential decorators. If class A has a field of type B and calls its methods in some methods of
+its own and number of own methods calling B's is greater than threshold and A doesn't extend or implement B, than it probably should
+to implement the decorator pattern.
++ **Singleton rule** - checks if all singletons' instances are encapsulated and created in a thread-safe manner.
+
 ### Extension
 There are 3 ways to extend JADA:
 1. Create new Rule. New rule class has to implement CheckRule interface, reside in org.meier.check.rule 
